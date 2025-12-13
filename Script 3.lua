@@ -83,7 +83,7 @@ textLabel.Parent = screenGui
 
 local textLabela = Instance.new("TextLabel")
 textLabela.Size = UDim2.new(0, 200, 0, 30)  -- 宽度200，高度30
-textLabela.Position = UDim2.new(0, 30, 0, 30)  -- 左上角，偏移10像素
+textLabela.Position = UDim2.new(0, 10, 0, 30)  -- 左上角，偏移10像素
 textLabela.Text = "" -- NoMonsters [F]
 textLabela.TextColor3 = Color3.new(1, 1, 1)  -- 白色文本
 textLabela.TextSize = 15
@@ -106,7 +106,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.F then
         noMonsters = not noMonsters
         if noMonsters then
-			textLabela.Text = "NoMonsters [F]"
+			textLabela.Text = "NoMonsters(Part & Buggy) [F]"
 		else
 			textLabela.Text = ""
 		end
@@ -156,10 +156,7 @@ workspace.ChildAdded:Connect(function(child)
 		child:Destroy()
 	end
     if child:IsA("Part") and child.Name == "monster" then
-		child:Destroy()
-	end
-    if child:IsA("Part") and child.Name == "Spirit" then
-		child:Destroy()
+		child.Anchored = true;
 	end
     if child:IsA("Part") and child.Name == "handdebris" then
 		child:Destroy()
@@ -173,10 +170,8 @@ workspace.ChildAdded:Connect(function(child)
     if child:IsA("Part") and child.Name == "jack" then
 		child:Destroy()
 	end
-    if child:IsA("Part") and child.Name == "Guardian" then
-		child:Destroy()
-	end
 end)
+
 
 
 
