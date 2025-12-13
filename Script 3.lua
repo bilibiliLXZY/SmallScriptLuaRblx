@@ -251,12 +251,15 @@ workspace.ChildAdded:Connect(function(child)
     if not noMonsters then return end
 
     if child:IsA("Part") and child.Name == "handdebris" then
+		wait(2)
 		child:Destroy() -- Maybe
 	end
     if child:IsA("Part") and child.Name == "evilbunger" then
+		wait(0.3)
 		child:Destroy() -- Possibly Effectless
 	end
     if child:IsA("Part") and child.Name == "jack" then
+		wait(0.3)
 		child:Destroy() -- Maybe Effectless
 	end
 end)
@@ -266,19 +269,19 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 	end
 	if noMonsters then
     if child:IsA("Model") and child.Name == "evilbunger" then
+		wait(0.4)
 		child:Destroy() -- Possibly Effectless
 	end
     if child:IsA("Model") and child.Name == "???" then
+		wait(0.3)
 		child:Destroy() -- Not tested
-	end
-	if child:IsA("Model") and child.Name == "Spirit" then
-		PartRespawner:TrackPart(child, 0.5)
 	end
 	end
 	if child:IsA("Model") and child.Name == "battery" and espEnabled then
 		highlight(child,Color3.fromRGB(255, 143, 74))
 	end
 end)
+
 
 
 
