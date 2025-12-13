@@ -1,21 +1,21 @@
-local notificationLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/laagginq/ui-libraries/main/xaxas-notification/src.lua"))();
+-- local notificationLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/laagginq/ui-libraries/main/xaxas-notification/src.lua"))();
 
-local function notifytext(text,rgb,dur)
-	local notifications = notificationLibrary.new({            
-		NotificationLifetime = dur, 
-		NotificationPosition = "Middle",
+-- local function notifytext(text,rgb,dur)
+-- 	local notifications = notificationLibrary.new({            
+-- 		NotificationLifetime = dur, 
+-- 		NotificationPosition = "Middle",
 
-		TextFont = Enum.Font.Jura,
-		TextColor = rgb,
-		TextSize = 25,
+-- 		TextFont = Enum.Font.Jura,
+-- 		TextColor = rgb,
+-- 		TextSize = 25,
 
-		TextStrokeTransparency = 0, 
-		TextStrokeColor = Color3.fromRGB(0, 0, 0)
-	});
+-- 		TextStrokeTransparency = 0, 
+-- 		TextStrokeColor = Color3.fromRGB(0, 0, 0)
+-- 	});
 
-	notifications:BuildNotificationUI();
-	notifications:Notify(text);
-end
+-- 	notifications:BuildNotificationUI();
+-- 	notifications:Notify(text);
+-- end
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -37,13 +37,13 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
                 humanoid.MaxHealth = math.huge
                 humanoid.Health = math.huge
                 invincible = true
-                notifytext("Invincibility Enabled", Color3.fromRGB(50, 255, 50), 3)
+                -- notifytext("Invincibility Enabled", Color3.fromRGB(50, 255, 50), 3)
             else
                 -- 恢复默认值（假设默认是100）
                 humanoid.MaxHealth = 100
                 humanoid.Health = 100
                 invincible = false
-                notifytext("Invincibility Disabled", Color3.fromRGB(255, 50, 50), 3)
+                -- notifytext("Invincibility Disabled", Color3.fromRGB(255, 50, 50), 3)
             end
         end
     end
@@ -90,6 +90,7 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
         PointLight.Enabled = lightEnabled -- 保持之前的开关状态
     end
 end)
+
 
 
 
