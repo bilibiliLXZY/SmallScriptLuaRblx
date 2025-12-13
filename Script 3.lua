@@ -54,6 +54,47 @@ end
 
 -- 连接按键事件
 local lightEnabled = false
+local noMonsters = false
+
+
+
+
+-- GUI
+local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- 创建ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TopLeftDisplay"
+screenGui.ResetOnSpawn = false  -- 防止重生时重置
+screenGui.Parent = playerGui
+
+-- 创建TextLabel
+local textLabel = Instance.new("TextLabel")
+textLabel.Size = UDim2.new(0, 200, 0, 30)  -- 宽度200，高度30
+textLabel.Position = UDim2.new(0, 10, 0, 10)  -- 左上角，偏移10像素
+textLabel.Text = "Invinciblity [MOUSE3]"
+textLabel.TextColor3 = Color3.new(1, 1, 1)  -- 白色文本
+textLabel.TextSize = 15
+textLabel.BackgroundTransparency = 1  -- 背景透明
+textLabel.TextXAlignment = Enum.TextXAlignment.Left  -- 左对齐
+textLabel.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
+textLabel.Font = Enum.Font.SourceSansBold
+textLabel.Parent = screenGui
+textLabel.Enabled = false
+
+local textLabela = Instance.new("TextLabel")
+textLabela.Size = UDim2.new(0, 200, 0, 30)  -- 宽度200，高度30
+textLabela.Position = UDim2.new(0, 10, 0, 10)  -- 左上角，偏移10像素
+textLabela.Text = "NoMonsters [F]"
+textLabela.TextColor3 = Color3.new(1, 1, 1)  -- 白色文本
+textLabela.TextSize = 15
+textLabela.BackgroundTransparency = 1  -- 背景透明
+textLabela.TextXAlignment = Enum.TextXAlignment.Left  -- 左对齐
+textLabela.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
+textLabela.Font = Enum.Font.SourceSansBold
+textLabela.Parent = screenGui
+textLabela.Enabled = false
+
 
 -- 监听鼠标按键（Roblox环境）
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -63,6 +104,10 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.Q then
         lightEnabled = not lightEnabled  -- 切换状态
         PointLight.Enabled = lightEnabled
+    end
+    if input.KeyCode == Enum.KeyCode.F then
+        noMonsters = not noMonsters
+        textLabela.Enabled = noMonsters
     end
     if input.UserInputType == Enum.UserInputType.MouseButton3 then
         local character = LocalPlayer.Character
@@ -76,6 +121,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
                 invincible = true
                 invincibleLightEnabled = true -- 开启无敌光源
                 InvincibilityLight.Enabled = true -- 设置无敌光源为可见
+                textLabel.Enabled = true
                 -- notifytext("Invincibility Enabled", Color3.fromRGB(50, 255, 50), 3)
             else
                 -- 恢复默认值（假设默认是100）
@@ -84,12 +130,12 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
                 invincible = false
                 invincibleLightEnabled = false -- 关闭无敌光源
                 InvincibilityLight.Enabled = false
+                textLabel.Enabled = false
                 -- notifytext("Invincibility Disabled", Color3.fromRGB(255, 50, 50), 3)
             end
         end
     end
 end)
-
 -- 可选：添加角色重新生成时的重新连接
 LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     Character = newCharacter
@@ -102,6 +148,33 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     end
 end)
 
+workspace.ChildAdded:Connect(function(child)
+    if not noMonsters then return end
+	if child:IsA("Part") and child.Name == "monster2" then
+		child:Destroy()
+	end
+    if child:IsA("Part") and child.Name == "monster" then
+		child:Destroy()
+	end
+    if child:IsA("Part") and child.Name == "Spirit" then
+		child:Destroy()
+	end
+    if child:IsA("Part") and child.Name == "handdebris" then
+		child:Destroy()
+	end
+    if child:IsA("Part") and child.Name == "evilbunger" then
+		child:Destroy()
+	end
+    if child:IsA("Part") and child.Name == "???" then
+		child:Destroy()
+	end
+    if child:IsA("Part") and child.Name == "jack" then
+		child:Destroy()
+	end
+    if child:IsA("Part") and child.Name == "Guardian" then
+		child:Destroy()
+	end
+end)
 
 
 
