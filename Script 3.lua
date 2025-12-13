@@ -21,6 +21,16 @@ local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 
 local invincible = false
+local invincibleLightEnabled = false -- 新增：无敌光源的开关状态
+
+-- 创建无敌状态专用的绿色点光源
+local InvincibilityLight = Instance.new("PointLight")
+InvincibilityLight.Name = "Invincibility_Light"
+InvincibilityLight.Range = 8 -- 范围可以比普通光源小一些
+InvincibilityLight.Brightness = 2.5 -- 亮度可以更高以突出状态
+InvincibilityLight.Color = Color3.fromRGB(50, 255, 50) -- 绿色
+InvincibilityLight.Shadows = false
+InvincibilityLight.Enabled = false -- 初始关闭
 
 -- 监听鼠标按键（Roblox环境）
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -37,12 +47,16 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
                 humanoid.MaxHealth = math.huge
                 humanoid.Health = math.huge
                 invincible = true
+                invincibleLightEnabled = true -- 开启无敌光源
+                InvincibilityLight.Enabled = true -- 设置无敌光源为可见
                 -- notifytext("Invincibility Enabled", Color3.fromRGB(50, 255, 50), 3)
             else
                 -- 恢复默认值（假设默认是100）
                 humanoid.MaxHealth = 100
                 humanoid.Health = 100
                 invincible = false
+                invincibleLightEnabled = false -- 关闭无敌光源
+                InvincibilityLight.Enabled = false
                 -- notifytext("Invincibility Disabled", Color3.fromRGB(255, 50, 50), 3)
             end
         end
@@ -65,8 +79,10 @@ PointLight.Brightness = 2.25
 PointLight.Shadows = false
 PointLight.Enabled = false  -- 初始状态为关闭
 
+
 if LHRP then 
     PointLight.Parent = LHRP 
+    InvincibilityLight.Parent = LHRP
 end
 
 -- 连接按键事件
@@ -76,7 +92,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.Q then
         lightEnabled = not lightEnabled  -- 切换状态
         PointLight.Enabled = lightEnabled
-
+        
     end
 end)
 
@@ -90,6 +106,7 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
         PointLight.Enabled = lightEnabled -- 保持之前的开关状态
     end
 end)
+
 
 
 
