@@ -16,6 +16,13 @@
 -- 	notifications:BuildNotificationUI();
 -- 	notifications:Notify(text);
 -- end
+local function highlight(child,rgbcolor)
+		local hl = Instance.new("Highlight",child)
+		hl.Name = "highlight"
+		hl.OutlineTransparency = 1
+		hl.FillTransparency = 0.25
+		hl.FillColor = rgbcolor
+end
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -93,6 +100,18 @@ textLabela.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
 textLabela.Font = Enum.Font.SourceSansBold
 textLabela.Parent = screenGui
 
+local textLabelb = Instance.new("TextLabel")
+textLabelb.Size = UDim2.new(0, 200, 0, 30)  -- 宽度200，高度30
+textLabelb.Position = UDim2.new(0, 10, 0, 50)  -- 左上角，偏移10像素
+textLabelb.Text = "" -- ESP [C]
+textLabelb.TextColor3 = Color3.new(1, 1, 1)  -- 白色文本
+textLabelb.TextSize = 15
+textLabelb.BackgroundTransparency = 1  -- 背景透明
+textLabelb.TextXAlignment = Enum.TextXAlignment.Left  -- 左对齐
+textLabelb.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
+textLabelb.Font = Enum.Font.SourceSansBold
+textLabelb.Parent = screenGui
+
 
 -- 监听鼠标按键（Roblox环境）
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -111,6 +130,9 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			textLabela.Text = ""
 		end
     end
+	if input.KeyCode == Enum.KeyCode.C then
+		textLabelb.Text = "" -- ESP [C]
+	end
     if input.UserInputType == Enum.UserInputType.MouseButton3 then
         local character = LocalPlayer.Character
         if not character then return end
@@ -153,22 +175,40 @@ end)
 workspace.ChildAdded:Connect(function(child)
     if not noMonsters then return end
 	if child:IsA("Part") and child.Name == "monster2" then
-		child:Destroy()
+		child:Destroy() -- Effectless
 	end
     if child:IsA("Part") and child.Name == "monster" then
-		child.Anchored = true;
+		child.Destroy()
 	end
     if child:IsA("Part") and child.Name == "handdebris" then
-		child:Destroy()
+		child:Destroy() -- Maybe
 	end
     if child:IsA("Part") and child.Name == "evilbunger" then
-		child:Destroy()
+		child:Destroy() -- Possibly Effectless
 	end
     if child:IsA("Part") and child.Name == "???" then
-		child:Destroy()
+		child:Destroy() -- Not tested
 	end
     if child:IsA("Part") and child.Name == "jack" then
+		child:Destroy() -- Maybe Effectless
+	end
+end)
+workspace.rooms.DescendantAdded:Connect(function(child)
+	if child:IsA("Model") and child.Name == "jack" then
+		highlight(child.Parent,Color3.fromRGB(250, 125, 125))
 		child:Destroy()
+	end
+    if child:IsA("Model") and child.Name == "evilbunger" then
+		child:Destroy() -- Possibly Effectless
+	end
+    if child:IsA("Model") and child.Name == "???" then
+		child:Destroy() -- Not tested
+	end
+    if child:IsA("Model") and child.Name == "Spirit" then
+		child:Destroy() -- Maybe Effectless
+	end
+	if child:IsA("Model") and child.Name == "Guardian" then
+		child:Destroy() -- Maybe Effectless
 	end
 end)
 
