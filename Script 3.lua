@@ -237,13 +237,13 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
 end)
     
 workspace.ChildAdded:Connect(function(child)
+	if not noMonsters then return end
 	if child:IsA("Part") and child.Name == "???" then
-		PartRespawner:TrackPart(child, 0.25)
+		wait(0.3)
 		child:Destroy() -- Not tested
 	end
 	if child:IsA("Part") and child.Name == "monster" then
 		wait(0.5)
-		PartRespawner:TrackPart(child, 0.5)
 		child:Destroy()
 	end
 end)
@@ -261,10 +261,10 @@ workspace.ChildAdded:Connect(function(child)
 	end
 end)
 workspace.rooms.DescendantAdded:Connect(function(child)
-	if child:IsA("Model") and child.Name == "jack" then
+	if child:IsA("Model") and child.Name == "jack" and espEnabled then
 		if espEnabled then highlight(child.Parent,Color3.fromRGB(250, 125, 125)) end
-		child:Destroy()
 	end
+	if noMonsters then
     if child:IsA("Model") and child.Name == "evilbunger" then
 		child:Destroy() -- Possibly Effectless
 	end
@@ -274,10 +274,12 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 	if child:IsA("Model") and child.Name == "Spirit" then
 		PartRespawner:TrackPart(child, 0.5)
 	end
+	end
 	if child:IsA("Model") and child.Name == "battery" and espEnabled then
 		highlight(child,Color3.fromRGB(255, 143, 74))
 	end
 end)
+
 
 
 
