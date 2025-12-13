@@ -216,7 +216,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if humanoid then
             if not antimonster2 then
                 humanoid.MaxHealth = math.huge
-                humanoid.Health = math.huge + 1
+                humanoid.Health = math.huge
+				humanoid.Health += 100
                 antimonster2 = true
                 textLabelc.Text = "NaNInvincibility [T]"
             else
@@ -229,7 +230,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
                 	humanoid.Health = 100
 				end
                 antimonster2 = false
-                textLabel.Text = ""
+                textLabelc.Text = ""
             end
         end
 	end
@@ -295,7 +296,7 @@ workspace.ChildAdded:Connect(function(child)
     if not noMonsters then return end
 
     if child:IsA("Part") and child.Name == "handdebris" then
-		wait(2)
+		wait(3.5)
 		child:Destroy() -- Maybe
 	end
     if child:IsA("Part") and child.Name == "evilbunger" then
@@ -325,6 +326,7 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 		highlight(child,Color3.fromRGB(255, 143, 74))
 	end
 end)
+
 
 
 
