@@ -27,7 +27,7 @@ local invincibleLightEnabled = false -- 新增：无敌光源的开关状态
 local InvincibilityLight = Instance.new("PointLight")
 InvincibilityLight.Name = "Invincibility_Light"
 InvincibilityLight.Range = 5 -- 范围可以比普通光源小一些
-InvincibilityLight.Brightness = 3.125 -- 亮度可以更高以突出状态
+InvincibilityLight.Brightness = 3 -- 亮度可以更高以突出状态
 InvincibilityLight.Color = Color3.fromRGB(50, 255, 50) -- 绿色
 InvincibilityLight.Shadows = false
 InvincibilityLight.Enabled = false -- 初始关闭
@@ -108,6 +108,7 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
         PointLight.Enabled = lightEnabled -- 保持之前的开关状态
     end
 end)
+
 
 
 
