@@ -262,7 +262,7 @@ workspace.ChildAdded:Connect(function(child)
 end)
 workspace.rooms.DescendantAdded:Connect(function(child)
 	if child:IsA("Model") and child.Name == "jack" then
-		highlight(child.Parent,Color3.fromRGB(250, 125, 125))
+		if espEnabled then highlight(child.Parent,Color3.fromRGB(250, 125, 125)) end
 		child:Destroy()
 	end
     if child:IsA("Model") and child.Name == "evilbunger" then
@@ -274,10 +274,11 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 	if child:IsA("Model") and child.Name == "Spirit" then
 		PartRespawner:TrackPart(child, 0.5)
 	end
-	if child:IsA("Model") and child.Name == "battery" then
+	if child:IsA("Model") and child.Name == "battery" and espEnabled then
 		highlight(child,Color3.fromRGB(255, 143, 74))
 	end
 end)
+
 
 
 
