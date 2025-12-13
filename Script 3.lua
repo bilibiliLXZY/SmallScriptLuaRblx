@@ -72,7 +72,7 @@ screenGui.Parent = playerGui
 local textLabel = Instance.new("TextLabel")
 textLabel.Size = UDim2.new(0, 200, 0, 30)  -- 宽度200，高度30
 textLabel.Position = UDim2.new(0, 10, 0, 10)  -- 左上角，偏移10像素
-textLabel.Text = "Invinciblity [MOUSE3]"
+textLabel.Text = "" -- Invinciblity [MOUSE3]
 textLabel.TextColor3 = Color3.new(1, 1, 1)  -- 白色文本
 textLabel.TextSize = 15
 textLabel.BackgroundTransparency = 1  -- 背景透明
@@ -80,12 +80,11 @@ textLabel.TextXAlignment = Enum.TextXAlignment.Left  -- 左对齐
 textLabel.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
 textLabel.Font = Enum.Font.SourceSansBold
 textLabel.Parent = screenGui
-textLabel.Enabled = false
 
 local textLabela = Instance.new("TextLabel")
 textLabela.Size = UDim2.new(0, 200, 0, 30)  -- 宽度200，高度30
-textLabela.Position = UDim2.new(0, 10, 0, 10)  -- 左上角，偏移10像素
-textLabela.Text = "NoMonsters [F]"
+textLabela.Position = UDim2.new(0, 30, 0, 30)  -- 左上角，偏移10像素
+textLabela.Text = "" -- NoMonsters [F]
 textLabela.TextColor3 = Color3.new(1, 1, 1)  -- 白色文本
 textLabela.TextSize = 15
 textLabela.BackgroundTransparency = 1  -- 背景透明
@@ -93,7 +92,6 @@ textLabela.TextXAlignment = Enum.TextXAlignment.Left  -- 左对齐
 textLabela.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
 textLabela.Font = Enum.Font.SourceSansBold
 textLabela.Parent = screenGui
-textLabela.Enabled = false
 
 
 -- 监听鼠标按键（Roblox环境）
@@ -107,7 +105,11 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
     if input.KeyCode == Enum.KeyCode.F then
         noMonsters = not noMonsters
-        textLabela.Enabled = noMonsters
+        if noMonsters then
+			textLabela.Text = "NoMonsters [F]"
+		else
+			textLabela.Text = ""
+		end
     end
     if input.UserInputType == Enum.UserInputType.MouseButton3 then
         local character = LocalPlayer.Character
@@ -121,7 +123,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
                 invincible = true
                 invincibleLightEnabled = true -- 开启无敌光源
                 InvincibilityLight.Enabled = true -- 设置无敌光源为可见
-                textLabel.Enabled = true
+                textLabel.Text = "Invincibility [MOUSE3]"
                 -- notifytext("Invincibility Enabled", Color3.fromRGB(50, 255, 50), 3)
             else
                 -- 恢复默认值（假设默认是100）
@@ -130,7 +132,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
                 invincible = false
                 invincibleLightEnabled = false -- 关闭无敌光源
                 InvincibilityLight.Enabled = false
-                textLabel.Enabled = false
+                textLabel.Text = ""
                 -- notifytext("Invincibility Disabled", Color3.fromRGB(255, 50, 50), 3)
             end
         end
@@ -175,6 +177,7 @@ workspace.ChildAdded:Connect(function(child)
 		child:Destroy()
 	end
 end)
+
 
 
 
