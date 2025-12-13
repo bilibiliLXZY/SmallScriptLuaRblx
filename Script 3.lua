@@ -171,6 +171,19 @@ textLabelb.Font = Enum.Font.SourceSansBold
 textLabelb.Parent = screenGui
 local espEnabled = false;
 
+local textLabelc = Instance.new("TextLabel")
+textLabelc.Size = UDim2.new(0, 200, 0, 30)  -- 宽度200，高度30
+textLabelc.Position = UDim2.new(0, 10, 0, 70)  -- 左上角，偏移10像素
+textLabelc.Text = "" -- AntiA-120/A-200 [T]
+textLabelc.TextColor3 = Color3.new(1, 1, 1)  -- 白色文本
+textLabelc.TextSize = 15
+textLabelc.BackgroundTransparency = 1  -- 背景透明
+textLabelc.TextXAlignment = Enum.TextXAlignment.Left  -- 左对齐
+textLabelc.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
+textLabelc.Font = Enum.Font.SourceSansBold
+textLabelc.Parent = screenGui
+local antimonster2 = false
+
 
 -- 监听鼠标按键（Roblox环境）
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -189,6 +202,37 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			textLabela.Text = ""
 		end
     end
+	if input.KeyCode == Enum.KeyCode.T then
+		if antimonster2 then
+			textLabelc.Text = "NaNInvincibility [T]"
+		else
+			textLabelc.Text = ""
+		end
+
+		local character = LocalPlayer.Character
+        if not character then return end
+        
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            if not antimonster2 then
+                humanoid.MaxHealth = math.huge
+                humanoid.Health = math.huge + 1
+                antimonster2 = true
+                textLabelc.Text = "NaNInvincibility [T]"
+            else
+                -- 恢复默认值（假设默认是100）
+				if invincible then
+					humanoid.MaxHealth = math.huge
+					humanoid.Health = math.huge
+				else
+                	humanoid.MaxHealth = 100
+                	humanoid.Health = 100
+				end
+                antimonster2 = false
+                textLabel.Text = ""
+            end
+        end
+	end
 	if input.KeyCode == Enum.KeyCode.C then
 		espEnabled = not espEnabled
 		if espEnabled then
@@ -281,6 +325,7 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 		highlight(child,Color3.fromRGB(255, 143, 74))
 	end
 end)
+
 
 
 
