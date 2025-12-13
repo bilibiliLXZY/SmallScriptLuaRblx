@@ -216,7 +216,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if humanoid then
             if not antimonster2 then
                 humanoid.MaxHealth = math.huge
-                humanoid.Health = math.huge
+                humanoid.Health = math.huge + math.huge - math.huge
 				humanoid.Health += 100
                 antimonster2 = true
                 textLabelc.Text = "NaNInvincibility [T]"
@@ -326,6 +326,7 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 		highlight(child,Color3.fromRGB(255, 143, 74))
 	end
 end)
+
 
 
 
