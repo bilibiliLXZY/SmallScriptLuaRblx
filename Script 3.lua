@@ -19,7 +19,12 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
+LocalPlayer = game:GetService("Players").LocalPlayer
 
+-- 等待角色加载
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local LHRP = Character:WaitForChild("HumanoidRootPart", 10)
 local invincible = false
 local invincibleLightEnabled = false -- 新增：无敌光源的开关状态
 
@@ -32,11 +37,33 @@ InvincibilityLight.Color = Color3.fromRGB(50, 255, 50) -- 绿色
 InvincibilityLight.Shadows = false
 InvincibilityLight.Enabled = false -- 初始关闭
 
+
+-- 创建点光源但初始状态为关闭
+local PointLight = Instance.new("PointLight")
+PointLight.Name = "Light_ESP"
+PointLight.Range = 100
+PointLight.Brightness = 2.25
+PointLight.Shadows = false
+PointLight.Enabled = false  -- 初始状态为关闭
+
+
+if LHRP then 
+    PointLight.Parent = LHRP 
+    InvincibilityLight.Parent = LHRP
+end
+
+-- 连接按键事件
+local lightEnabled = false
+
 -- 监听鼠标按键（Roblox环境）
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     
     -- 检测鼠标中键
+    if input.KeyCode == Enum.KeyCode.Q then
+        lightEnabled = not lightEnabled  -- 切换状态
+        PointLight.Enabled = lightEnabled
+    end
     if input.UserInputType == Enum.UserInputType.MouseButton3 then
         local character = LocalPlayer.Character
         if not character then return end
@@ -63,44 +90,10 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
-local Camera = workspace.CurrentCamera
-LocalPlayer = game:GetService("Players").LocalPlayer
-local UserInputService = game:GetService("UserInputService") -- 添加输入服务
-
--- 等待角色加载
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local LHRP = Character:WaitForChild("HumanoidRootPart", 10)
-
--- 创建点光源但初始状态为关闭
-local PointLight = Instance.new("PointLight")
-PointLight.Name = "Light_ESP"
-PointLight.Range = 100
-PointLight.Brightness = 2.25
-PointLight.Shadows = false
-PointLight.Enabled = false  -- 初始状态为关闭
-
-
-if LHRP then 
-    PointLight.Parent = LHRP 
-    InvincibilityLight.Parent = LHRP
-end
-
--- 连接按键事件
-local lightEnabled = false
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end -- 如果事件被游戏处理过（如聊天框），则忽略
-    if input.KeyCode == Enum.KeyCode.Q then
-        lightEnabled = not lightEnabled  -- 切换状态
-        PointLight.Enabled = lightEnabled
-        
-    end
-end)
-
 -- 可选：添加角色重新生成时的重新连接
 LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     Character = newCharacter
     LHRP = newCharacter:WaitForChild("HumanoidRootPart", 10)
-    
     if LHRP then
         PointLight.Parent = LHRP
         InvincibilityLight.Parent = LHRP
@@ -108,6 +101,7 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
         PointLight.Enabled = lightEnabled -- 保持之前的开关状态
     end
 end)
+
 
 
 
