@@ -76,6 +76,11 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.Q then
         lightEnabled = not lightEnabled  -- 切换状态
         PointLight.Enabled = lightEnabled
+			if lightEnabled then
+                notifytext("Light Enabled", Color3.fromRGB(50, 255, 50), 3)
+            else
+                notifytext("Light Disabled", Color3.fromRGB(255, 50, 50), 3)
+            end
     end
 end)
 
@@ -89,4 +94,5 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
         PointLight.Enabled = lightEnabled -- 保持之前的开关状态
     end
 end)
+
 
