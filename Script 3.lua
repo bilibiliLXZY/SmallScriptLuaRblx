@@ -76,11 +76,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.Q then
         lightEnabled = not lightEnabled  -- 切换状态
         PointLight.Enabled = lightEnabled
-        if lightEnabled then
-            notifytext("Light Enabled", Color3.fromRGB(50, 255, 50), 3)
-        else
-            notifytext("Light Disabled", Color3.fromRGB(255, 50, 50), 3)
-        end
     end
 end)
 
@@ -95,24 +90,3 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     end
 end)
 
-
-
-LocalPlayer = game.Players.LocalPlayer
-if LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules:FindFirstChild("paralysis") then
-    LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules.paralysis:Destroy() -- Fuck you A90
-end
-if LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules:FindFirstChild("Paralysis") then
-    LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules.Paralysis:Destroy()
-end
-if LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules:FindFirstChild("A90") then
-    LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules.A90:Destroy() 
-end
-if LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules:FindFirstChild("A50") then
-    LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules.A50:Destroy() 
-end
-if LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules:FindFirstChild("darkness") then
-    LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules.darkness:Destroy() 
-end
-if LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules:FindFirstChild("Darkness") then
-    LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules.Darkness:Destroy() 
-end
