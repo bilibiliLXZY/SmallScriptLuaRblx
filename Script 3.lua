@@ -103,9 +103,12 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     
     if LHRP then
         PointLight.Parent = LHRP
+        InvincibilityLight.Parent = LHRP
+        InvincibilityLight.Enabled = invincibleLightEnabled;
         PointLight.Enabled = lightEnabled -- 保持之前的开关状态
     end
 end)
+
 
 
 
