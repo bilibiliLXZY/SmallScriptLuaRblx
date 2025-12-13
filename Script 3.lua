@@ -63,7 +63,65 @@ end
 local lightEnabled = false
 local noMonsters = false
 
+local PartRespawner = {}
 
+function PartRespawner:TrackPart(part, respawnInterval)
+    if not part:IsA("BasePart") then return end
+    
+    local initialPosition = part.Position
+    local initialOrientation = part.Orientation
+    part.Anchored = true  -- 先锚定
+    
+    -- 可选：在物体上显示原始位置标记
+    local highlight = Instance.new("SelectionBox")
+    highlight.Name = "RespawnMarker"
+    highlight.Color3 = Color3.fromRGB(255, 0, 0)
+    highlight.Adornee = part
+    highlight.Parent = part
+    
+    local respawnThread
+    respawnThread = task.spawn(function()
+        while part and part.Parent do
+            task.wait(respawnInterval or 0.1)
+            
+            if part and part.Parent then
+                -- 平滑移动回原始位置
+                local tweenService = game:GetService("TweenService")
+                local tweenInfo = TweenInfo.new(
+                    0.5,  -- 时间
+                    Enum.EasingStyle.Quad,  -- 缓动类型
+                    Enum.EasingDirection.Out  -- 缓动方向
+                )
+                
+                local tween = tweenService:Create(part, tweenInfo, {
+                    Position = initialPosition,
+                    Orientation = initialOrientation
+                })
+                tween:Play()
+            else
+                break
+            end
+        end
+    end)
+    
+    return {
+        Stop = function()
+            if respawnThread then
+                task.cancel(respawnThread)
+            end
+            if highlight then
+                highlight:Destroy()
+            end
+            if part then
+                part.Anchored = false
+            end
+        end,
+        
+        GetInitialPosition = function()
+            return initialPosition
+        end
+    }
+end
 
 
 -- GUI
@@ -111,6 +169,7 @@ textLabelb.TextXAlignment = Enum.TextXAlignment.Left  -- 左对齐
 textLabelb.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
 textLabelb.Font = Enum.Font.SourceSansBold
 textLabelb.Parent = screenGui
+local espEnabled = false;
 
 
 -- 监听鼠标按键（Roblox环境）
@@ -131,7 +190,12 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		end
     end
 	if input.KeyCode == Enum.KeyCode.C then
-		textLabelb.Text = "" -- ESP [C]
+		espEnabled = not espEnabled
+		if espEnabled then
+			textLabelb.Text = "ESP [C]"
+		else
+			textLabelb.Text = ""
+		end
 	end
     if input.UserInputType == Enum.UserInputType.MouseButton3 then
         local character = LocalPlayer.Character
@@ -171,23 +235,26 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
         PointLight.Enabled = lightEnabled -- 保持之前的开关状态
     end
 end)
-
+    
+workspace.ChildAdded:Connect(function(child)
+	if child:IsA("Part") and child.Name == "???" then
+		PartRespawner:TrackPart(child, 0.25)
+		child:Destroy() -- Not tested
+	end
+	if child:IsA("Part") and child.Name == "monster" then
+		wait(0.5)
+		PartRespawner:TrackPart(child, 0.5)
+		child:Destroy()
+	end
+end)
 workspace.ChildAdded:Connect(function(child)
     if not noMonsters then return end
-	if child:IsA("Part") and child.Name == "monster2" then
-		child:Destroy() -- Effectless
-	end
-    if child:IsA("Part") and child.Name == "monster" then
-		child.Destroy()
-	end
+
     if child:IsA("Part") and child.Name == "handdebris" then
 		child:Destroy() -- Maybe
 	end
     if child:IsA("Part") and child.Name == "evilbunger" then
 		child:Destroy() -- Possibly Effectless
-	end
-    if child:IsA("Part") and child.Name == "???" then
-		child:Destroy() -- Not tested
 	end
     if child:IsA("Part") and child.Name == "jack" then
 		child:Destroy() -- Maybe Effectless
@@ -204,13 +271,14 @@ workspace.rooms.DescendantAdded:Connect(function(child)
     if child:IsA("Model") and child.Name == "???" then
 		child:Destroy() -- Not tested
 	end
-    if child:IsA("Model") and child.Name == "Spirit" then
-		child:Destroy() -- Maybe Effectless
+	if child:IsA("Model") and child.Name == "Spirit" then
+		PartRespawner:TrackPart(child, 0.5)
 	end
-	if child:IsA("Model") and child.Name == "Guardian" then
-		child:Destroy() -- Maybe Effectless
+	if child:IsA("Model") and child.Name == "battery" then
+		highlight(child,Color3.fromRGB(255, 143, 74))
 	end
 end)
+
 
 
 
