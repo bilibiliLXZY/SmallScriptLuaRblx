@@ -326,25 +326,3 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 		highlight(child,Color3.fromRGB(255, 143, 74))
 	end
 end)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
