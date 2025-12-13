@@ -248,13 +248,6 @@ workspace.ChildAdded:Connect(function(child)
 	end
 end)
 workspace.ChildAdded:Connect(function(child)
-	if child:IsA("Part") and child.Name == "monster2" then
-		wait(0.25)
-		PartRespawner:TrackPart(child, 0.35)
-		child:Destroy()
-	end
-end)
-workspace.ChildAdded:Connect(function(child)
     if not noMonsters then return end
 
     if child:IsA("Part") and child.Name == "handdebris" then
@@ -285,6 +278,7 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 		highlight(child,Color3.fromRGB(255, 143, 74))
 	end
 end)
+
 
 
 
