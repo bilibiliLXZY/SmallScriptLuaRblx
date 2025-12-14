@@ -184,7 +184,46 @@ textLabelc.Font = Enum.Font.SourceSansBold
 textLabelc.Parent = screenGui
 local antimonster2 = false
 
-
+local function createBatteryAtFeet()
+    -- 计算脚下的位置
+    local spawnPosition = humanoidRootPart.Position - Vector3.new(0, 3, 0)
+    
+    -- 创建电池Model
+    local battery = Instance.new("Model")
+    battery.Name = "battery"
+    
+    -- 创建电池主体
+    local mainPart = Instance.new("Part")
+    mainPart.Name = "BatteryBody"
+    mainPart.Size = Vector3.new(1, 2, 1)
+    mainPart.Position = spawnPosition
+    mainPart.Anchored = true
+    mainPart.CanCollide = true
+    mainPart.Material = EnumMaterial.Neon
+    mainPart.Color = Color3.fromRGB(255, 143, 74)  -- 橙色
+    mainPart.Parent = battery
+    
+    -- 添加顶部
+    local topPart = Instance.new("Part")
+    topPart.Name = "BatteryTop"
+    topPart.Size = Vector3.new(0.8, 0.3, 0.8)
+    topPart.Position = spawnPosition + Vector3.new(0, 1.15, 0)
+    topPart.Anchored = true
+    topPart.CanCollide = false
+    topPart.Material = EnumMaterial.Metal
+    topPart.Color = Color3.fromRGB(100, 100, 100)  -- 灰色
+    topPart.Parent = battery
+    
+    -- 将电池放入workspace
+    battery.Parent = workspace
+    
+    -- 调用高亮函数（假设highlight函数已定义）
+    if espEnabled then
+        highlight(battery, Color3.fromRGB(255, 143, 74))
+    end
+    
+    return battery
+end
 -- 监听鼠标按键（Roblox环境）
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -202,6 +241,9 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			textLabela.Text = ""
 		end
     end
+	if input.KeyCode == Enum.KeyCode.Y then
+		createBatteryAtFeet()
+	end
 	if input.KeyCode == Enum.KeyCode.T then
 		if antimonster2 then
 			textLabelc.Text = "NaNInvincibility [T]"
@@ -283,10 +325,6 @@ end)
     
 workspace.ChildAdded:Connect(function(child)
 	if not noMonsters then return end
-	if child:IsA("Part") and child.Name == "???" then
-		wait(0.3)
-		child:Destroy() -- Not tested
-	end
 	if child:IsA("Part") and child.Name == "monster" then
 		wait(0.5)
 		child:Destroy()
@@ -296,7 +334,7 @@ workspace.ChildAdded:Connect(function(child)
     if not noMonsters then return end
 
     if child:IsA("Part") and child.Name == "handdebris" then
-		wait(3.5)
+		wait(2.5)
 		child:Destroy() -- Maybe
 	end
     if child:IsA("Part") and child.Name == "evilbunger" then
@@ -317,12 +355,9 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 		wait(0.4)
 		child:Destroy() -- Possibly Effectless
 	end
-    if child:IsA("Model") and child.Name == "???" then
-		wait(0.3)
-		child:Destroy() -- Not tested
-	end
 	end
 	if child:IsA("Model") and child.Name == "battery" and espEnabled then
 		highlight(child,Color3.fromRGB(255, 143, 74))
 	end
 end)
+
