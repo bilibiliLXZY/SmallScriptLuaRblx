@@ -122,7 +122,6 @@ textLabelc.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
 textLabelc.Font = Enum.Font.SourceSansBold
 textLabelc.Parent = screenGui
 local antimonster2 = false
-
 -- 监听鼠标按键（Roblox环境）
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -235,7 +234,14 @@ workspace.ChildAdded:Connect(function(child)
     -- 创建新的CFrame，只有偏航角，俯仰和横滚为0
     local newCFrame = CFrame.new(currentPosition) * 
                       CFrame.Angles(currentPitch, currentYaw, 0)
+    local playerGui = LocalPlayer:WaitForChild("PlayerGui")
     
+    -- 方法1：直接禁用或移除Shaker
+    local shaker = playerGui:FindFirstChild("Shaker")
+    if shaker then
+        -- 方法A：直接销毁（最彻底）
+        shaker:Destroy()
+    end
     -- 立即应用
     camera.CFrame = newCFrame
 	end
@@ -258,7 +264,6 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 		highlight(child,Color3.fromRGB(255, 150, 50))
 	end
 end)
-
 
 
 
