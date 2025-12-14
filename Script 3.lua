@@ -19,8 +19,8 @@
 local function highlight(child,rgbcolor)
 		local hl = Instance.new("Highlight",child)
 		hl.Name = "highlight"
-		hl.OutlineTransparency = 1
-		hl.FillTransparency = 0.25
+		hl.OutlineTransparency = 0.1
+		hl.FillTransparency = 0.2
 		hl.FillColor = rgbcolor
 end
 local Players = game:GetService("Players")
@@ -62,8 +62,6 @@ end
 -- 连接按键事件
 local lightEnabled = false
 local noMonsters = false
-
-local batteryy = nil
 
 -- GUI
 local playerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -125,43 +123,6 @@ textLabelc.Font = Enum.Font.SourceSansBold
 textLabelc.Parent = screenGui
 local antimonster2 = false
 
-local function createBatteryFromTemplate()
-    if not batteryTemplate then
-        warn("没有电池模板可用！")
-        return nil
-    end
-    
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if not humanoidRootPart then return nil end
-    
-    -- 计算脚下的位置
-    local spawnPosition = humanoidRootPart.Position - Vector3.new(0, 3, 0)
-    
-    -- 克隆模板
-    local newBattery = batteryTemplate:Clone()
-    
-    -- 找到电池的主部件并设置位置
-    -- 方法A：假设电池模型有一个主要部件
-    local mainPart = newBattery:FindFirstChildWhichIsA("BasePart")
-    if mainPart then
-        mainPart.Position = spawnPosition
-        mainPart.Anchored = true
-    else
-        -- 方法B：遍历所有部件设置位置
-        for _, child in ipairs(newBattery:GetChildren()) do
-            if child:IsA("BasePart") then
-                -- 保持原有的相对位置，只设置整体位置偏移
-                local relativePosition = child.Position - (mainPart and mainPart.Position or Vector3.new(0,0,0))
-                child.Position = spawnPosition + relativePosition
-                child.Anchored = true
-            end
-        end
-    end
-    
-    -- 将新电池放入workspace
-    newBattery.Parent = workspace
-    return newBattery
-end
 -- 监听鼠标按键（Roblox环境）
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -179,9 +140,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			textLabela.Text = ""
 		end
     end
-	if input.KeyCode == Enum.KeyCode.Y then
-		createBatteryAtFeet()
-	end
 	if input.KeyCode == Enum.KeyCode.T then
 		if antimonster2 then
 			textLabelc.Text = "NaNInvincibility [T]"
@@ -272,21 +230,18 @@ workspace.ChildAdded:Connect(function(child)
     if not noMonsters then return end
 
     if child:IsA("Part") and child.Name == "handdebris" then
-		wait(2.5)
+		wait(2)
 		child:Destroy() -- Maybe
+		Camera.CFrame = CFrame.new(Camera.CFrame.Position)
 	end
     if child:IsA("Part") and child.Name == "evilbunger" then
 		wait(0.3)
 		child:Destroy() -- Possibly Effectless
 	end
-    if child:IsA("Part") and child.Name == "jack" then
-		wait(0.3)
-		child:Destroy() -- Maybe Effectless
-	end
 end)
 workspace.rooms.DescendantAdded:Connect(function(child)
 	if child:IsA("Model") and child.Name == "jack" and espEnabled then
-		if espEnabled then highlight(child.Parent,Color3.fromRGB(250, 125, 125)) end
+		if espEnabled then highlight(child.Parent,Color3.fromRGB(255, 125, 125)) end
 	end
 	if noMonsters then
     if child:IsA("Model") and child.Name == "evilbunger" then
@@ -295,11 +250,9 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 	end
 	end
 	if child:IsA("Model") and child.Name == "battery" and espEnabled then
-		highlight(child,Color3.fromRGB(255, 143, 74))
-	end
-	if child:IsA("Model") and child.Name == "battery" then
-		batteryy = child:Clone()
+		highlight(child,Color3.fromRGB(255, 150, 50))
 	end
 end)
+
 
 
