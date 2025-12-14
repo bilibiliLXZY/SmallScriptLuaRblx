@@ -63,66 +63,7 @@ end
 local lightEnabled = false
 local noMonsters = false
 
-local PartRespawner = {}
-
-function PartRespawner:TrackPart(part, respawnInterval)
-    if not part:IsA("BasePart") then return end
-    
-    local initialPosition = part.Position
-    local initialOrientation = part.Orientation
-    part.Anchored = true  -- 先锚定
-    
-    -- 可选：在物体上显示原始位置标记
-    local highlight = Instance.new("SelectionBox")
-    highlight.Name = "RespawnMarker"
-    highlight.Color3 = Color3.fromRGB(255, 0, 0)
-    highlight.Adornee = part
-    highlight.Parent = part
-    
-    local respawnThread
-    respawnThread = task.spawn(function()
-        while part and part.Parent do
-            task.wait(respawnInterval or 0.1)
-            
-            if part and part.Parent then
-                -- 平滑移动回原始位置
-                local tweenService = game:GetService("TweenService")
-                local tweenInfo = TweenInfo.new(
-                    0.5,  -- 时间
-                    Enum.EasingStyle.Quad,  -- 缓动类型
-                    Enum.EasingDirection.Out  -- 缓动方向
-                )
-                
-                local tween = tweenService:Create(part, tweenInfo, {
-                    Position = initialPosition,
-                    Orientation = initialOrientation
-                })
-                tween:Play()
-            else
-                break
-            end
-        end
-    end)
-    
-    return {
-        Stop = function()
-            if respawnThread then
-                task.cancel(respawnThread)
-            end
-            if highlight then
-                highlight:Destroy()
-            end
-            if part then
-                part.Anchored = false
-            end
-        end,
-        
-        GetInitialPosition = function()
-            return initialPosition
-        end
-    }
-end
-
+local batteryy = nil
 
 -- GUI
 local playerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -184,45 +125,42 @@ textLabelc.Font = Enum.Font.SourceSansBold
 textLabelc.Parent = screenGui
 local antimonster2 = false
 
-local function createBatteryAtFeet()
+local function createBatteryFromTemplate()
+    if not batteryTemplate then
+        warn("没有电池模板可用！")
+        return nil
+    end
+    
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return nil end
+    
     -- 计算脚下的位置
     local spawnPosition = humanoidRootPart.Position - Vector3.new(0, 3, 0)
     
-    -- 创建电池Model
-    local battery = Instance.new("Model")
-    battery.Name = "battery"
+    -- 克隆模板
+    local newBattery = batteryTemplate:Clone()
     
-    -- 创建电池主体
-    local mainPart = Instance.new("Part")
-    mainPart.Name = "BatteryBody"
-    mainPart.Size = Vector3.new(1, 2, 1)
-    mainPart.Position = spawnPosition
-    mainPart.Anchored = true
-    mainPart.CanCollide = true
-    mainPart.Material = EnumMaterial.Neon
-    mainPart.Color = Color3.fromRGB(255, 143, 74)  -- 橙色
-    mainPart.Parent = battery
-    
-    -- 添加顶部
-    local topPart = Instance.new("Part")
-    topPart.Name = "BatteryTop"
-    topPart.Size = Vector3.new(0.8, 0.3, 0.8)
-    topPart.Position = spawnPosition + Vector3.new(0, 1.15, 0)
-    topPart.Anchored = true
-    topPart.CanCollide = false
-    topPart.Material = EnumMaterial.Metal
-    topPart.Color = Color3.fromRGB(100, 100, 100)  -- 灰色
-    topPart.Parent = battery
-    
-    -- 将电池放入workspace
-    battery.Parent = workspace
-    
-    -- 调用高亮函数（假设highlight函数已定义）
-    if espEnabled then
-        highlight(battery, Color3.fromRGB(255, 143, 74))
+    -- 找到电池的主部件并设置位置
+    -- 方法A：假设电池模型有一个主要部件
+    local mainPart = newBattery:FindFirstChildWhichIsA("BasePart")
+    if mainPart then
+        mainPart.Position = spawnPosition
+        mainPart.Anchored = true
+    else
+        -- 方法B：遍历所有部件设置位置
+        for _, child in ipairs(newBattery:GetChildren()) do
+            if child:IsA("BasePart") then
+                -- 保持原有的相对位置，只设置整体位置偏移
+                local relativePosition = child.Position - (mainPart and mainPart.Position or Vector3.new(0,0,0))
+                child.Position = spawnPosition + relativePosition
+                child.Anchored = true
+            end
+        end
     end
     
-    return battery
+    -- 将新电池放入workspace
+    newBattery.Parent = workspace
+    return newBattery
 end
 -- 监听鼠标按键（Roblox环境）
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -359,5 +297,9 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 	if child:IsA("Model") and child.Name == "battery" and espEnabled then
 		highlight(child,Color3.fromRGB(255, 143, 74))
 	end
+	if child:IsA("Model") and child.Name == "battery" then
+		batteryy = child:Clone()
+	end
 end)
+
 
