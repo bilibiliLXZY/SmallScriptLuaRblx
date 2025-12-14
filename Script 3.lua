@@ -141,11 +141,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		end
     end
 	if input.KeyCode == Enum.KeyCode.T then
-		if antimonster2 then
-			textLabelc.Text = "NaNInvincibility [T]"
-		else
-			textLabelc.Text = ""
-		end
 
 		local character = LocalPlayer.Character
         if not character then return end
@@ -230,9 +225,19 @@ workspace.ChildAdded:Connect(function(child)
     if not noMonsters then return end
 
     if child:IsA("Part") and child.Name == "handdebris" then
-		wait(2)
+		wait(1.25)
 		child:Destroy() -- Maybe
-		Camera.CFrame = CFrame.new(Camera.CFrame.Position)
+	local currentPosition = camera.CFrame.Position
+    local currentLookVector = camera.CFrame.LookVector
+    -- 计算当前偏航角，但重置俯仰和横滚
+    local currentPitch, currentYaw, _ = camera.CFrame:ToOrientation()
+    
+    -- 创建新的CFrame，只有偏航角，俯仰和横滚为0
+    local newCFrame = CFrame.new(currentPosition) * 
+                      CFrame.Angles(currentPitch, currentYaw, 0)
+    
+    -- 立即应用
+    camera.CFrame = newCFrame
 	end
     if child:IsA("Part") and child.Name == "evilbunger" then
 		wait(0.3)
@@ -253,6 +258,7 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 		highlight(child,Color3.fromRGB(255, 150, 50))
 	end
 end)
+
 
 
 
