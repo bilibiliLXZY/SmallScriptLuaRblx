@@ -122,6 +122,19 @@ textLabelc.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
 textLabelc.Font = Enum.Font.SourceSansBold
 textLabelc.Parent = screenGui
 local antimonster2 = false
+
+local textLabeld = Instance.new("TextLabel")
+textLabeld.Size = UDim2.new(0, 200, 0, 30)  -- 宽度200，高度30
+textLabeld.Position = UDim2.new(0, 10, 0, 70)  -- 左上角，偏移10像素
+textLabeld.Text = "" -- EntityNotification [G]
+textLabeld.TextColor3 = Color3.new(1, 1, 1)  -- 白色文本
+textLabeld.TextSize = 15
+textLabeld.BackgroundTransparency = 1  -- 背景透明
+textLabeld.TextXAlignment = Enum.TextXAlignment.Left  -- 左对齐
+textLabeld.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
+textLabeld.Font = Enum.Font.SourceSansBold
+textLabeld.Parent = screenGui
+local entityNote = false
 -- 监听鼠标按键（Roblox环境）
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -139,6 +152,14 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			textLabela.Text = ""
 		end
     end
+	if input.KeyCode == Enum.KeyCode.G then
+		entityNote = not entityNote
+		if entityNote then
+			textLabeld.Text = "EntityNotification(Undone) [G]"
+		else
+			textLabeld.Text = ""
+		end
+	end
 	if input.KeyCode == Enum.KeyCode.T then
 
 		local character = LocalPlayer.Character
@@ -221,6 +242,9 @@ workspace.ChildAdded:Connect(function(child)
 	end
 end)
 workspace.ChildAdded:Connect(function(child)
+	if entityNote then 
+		
+	end
     if not noMonsters then return end
 
     if child:IsA("Part") and child.Name == "handdebris" then
@@ -264,6 +288,7 @@ workspace.rooms.DescendantAdded:Connect(function(child)
 		highlight(child,Color3.fromRGB(255, 150, 50))
 	end
 end)
+
 
 
 
