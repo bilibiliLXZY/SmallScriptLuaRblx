@@ -16,13 +16,15 @@
 -- 	notifications:BuildNotificationUI();
 -- 	notifications:Notify(text);
 -- end
+
 local function highlight(child,rgbcolor)
-		local hl = Instance.new("Highlight",child)
-		hl.Name = "highlight"
-		hl.OutlineTransparency = 0.1
-		hl.FillTransparency = 0.2
-		hl.FillColor = rgbcolor
+	local hl = Instance.new("Highlight",child)
+	hl.Name = "highlight"
+	hl.OutlineTransparency = 0.1
+	hl.FillTransparency = 0.2
+	hl.FillColor = rgbcolor
 end
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -44,7 +46,6 @@ InvincibilityLight.Color = Color3.fromRGB(50, 255, 50) -- 绿色
 InvincibilityLight.Shadows = false
 InvincibilityLight.Enabled = false -- 初始关闭
 
-
 -- 创建点光源但初始状态为关闭
 local PointLight = Instance.new("PointLight")
 PointLight.Name = "Light_ESP"
@@ -52,7 +53,6 @@ PointLight.Range = 100
 PointLight.Brightness = 2.25
 PointLight.Shadows = false
 PointLight.Enabled = false  -- 初始状态为关闭
-
 
 if LHRP then 
     PointLight.Parent = LHRP 
@@ -123,18 +123,109 @@ textLabelc.Font = Enum.Font.SourceSansBold
 textLabelc.Parent = screenGui
 local antimonster2 = false
 
-local textLabeld = Instance.new("TextLabel")
-textLabeld.Size = UDim2.new(0, 200, 0, 30)  -- 宽度200，高度30
-textLabeld.Position = UDim2.new(0, 10, 0, 70)  -- 左上角，偏移10像素
-textLabeld.Text = "" -- EntityNotification [G]
-textLabeld.TextColor3 = Color3.new(1, 1, 1)  -- 白色文本
-textLabeld.TextSize = 15
-textLabeld.BackgroundTransparency = 1  -- 背景透明
-textLabeld.TextXAlignment = Enum.TextXAlignment.Left  -- 左对齐
-textLabeld.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
-textLabeld.Font = Enum.Font.SourceSansBold
-textLabeld.Parent = screenGui
-local entityNote = false
+-- 删除EntityNotification相关代码，改为传送功能
+
+-- 传送功能相关变量
+local teleportEffect = Instance.new("Part")
+teleportEffect.Name = "TeleportTarget"
+teleportEffect.Shape = Enum.PartType.Cylinder
+teleportEffect.Size = Vector3.new(0.2, 5, 5)
+teleportEffect.Orientation = Vector3.new(0, 0, 90)
+teleportEffect.Color = Color3.fromRGB(0, 255, 0)
+teleportEffect.Material = Enum.Material.Neon
+teleportEffect.Transparency = 0.3
+teleportEffect.CanCollide = false
+teleportEffect.Anchored = true
+teleportEffect.Parent = nil
+
+local isTeleporting = false
+local teleportCooldown = false
+
+-- 从屏幕中心发射射线获取地面位置
+function getGroundPositionFromScreenCenter()
+    local viewportSize = Camera.ViewportSize
+    local screenCenter = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
+    local unitRay = Camera:ViewportPointToRay(screenCenter.X, screenCenter.Y)
+    
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+    raycastParams.FilterDescendantsInstances = {Character}
+    raycastParams.IgnoreWater = true
+    
+    local raycastResult = workspace:Raycast(unitRay.Origin, unitRay.Direction * 1000, raycastParams)
+    
+    if raycastResult then
+        -- 检查是否是地面（法线Y分量接近1）
+        local groundNormal = raycastResult.Normal.Y
+        if groundNormal > 0.7 then -- 至少是45度以内的斜坡
+            return raycastResult.Position
+        end
+    end
+    return nil
+end
+
+-- 执行传送
+function teleportToPosition(position)
+    if not Character or not LHRP or teleportCooldown then return false end
+    
+    -- 冷却时间
+    teleportCooldown = true
+    spawn(function()
+        teleportCooldown = false
+    end)
+    
+    -- 确保位置在地面以上
+    local teleportPos = position + Vector3.new(0, 3, 0)
+    
+    -- 执行传送
+    LHRP.CFrame = CFrame.new(teleportPos)
+    
+    -- 传送特效
+    if teleportEffect.Parent then
+        teleportEffect.Transparency = 1
+        wait(0.1)
+        teleportEffect.Transparency = 0.3
+    end
+    
+    return true
+end
+
+-- G键传送功能
+function handleTeleport()
+    if isTeleporting or teleportCooldown then return end
+    
+    isTeleporting = true
+    
+    -- 获取地面位置
+    local groundPos = getGroundPositionFromScreenCenter()
+    
+    if groundPos then
+        -- 显示传送目标
+        if not teleportEffect.Parent then
+            teleportEffect.Parent = workspace
+        end
+        teleportEffect.Position = groundPos + Vector3.new(0, 0.1, 0)
+        teleportEffect.Color = Color3.fromRGB(0, 255, 0)
+        
+        -- 执行传送
+        teleportToPosition(groundPos)
+        
+        -- 传送后隐藏效果
+        teleportEffect.Parent = nil
+    else
+        -- 无效位置，显示红色效果
+        local screenCenter = Camera.CFrame.Position + Camera.CFrame.LookVector * 20
+        teleportEffect.Parent = workspace
+        teleportEffect.Position = screenCenter
+        teleportEffect.Color = Color3.fromRGB(255, 0, 0)
+        
+        wait(0.3)
+        teleportEffect.Parent = nil
+    end
+    
+    isTeleporting = false
+end
+
 -- 监听鼠标按键（Roblox环境）
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -144,25 +235,20 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         lightEnabled = not lightEnabled  -- 切换状态
         PointLight.Enabled = lightEnabled
     end
-    if input.KeyCode == Enum.KeyCode.F then
+    if input.KeyCode == Enum.KeyCode.G then
         noMonsters = not noMonsters
         if noMonsters then
-			textLabela.Text = "NoMonsters(Part & Buggy) [F]"
-		else
-			textLabela.Text = ""
-		end
+            textLabela.Text = "NoMonsters(Part & Buggy) [G]"
+        else
+            textLabela.Text = ""
+        end
     end
-	if input.KeyCode == Enum.KeyCode.G then
-		entityNote = not entityNote
-		if entityNote then
-			textLabeld.Text = "EntityNotification(Undone) [G]"
-		else
-			textLabeld.Text = ""
-		end
-	end
-	if input.KeyCode == Enum.KeyCode.T then
-
-		local character = LocalPlayer.Character
+    -- G键改为传送功能
+    if input.KeyCode == Enum.KeyCode.F then
+        handleTeleport()
+    end
+    if input.KeyCode == Enum.KeyCode.T then
+        local character = LocalPlayer.Character
         if not character then return end
         
         local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -170,31 +256,31 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
             if not antimonster2 then
                 humanoid.MaxHealth = math.huge
                 humanoid.Health = math.huge + math.huge - math.huge
-				humanoid.Health += 100
+                humanoid.Health += 100
                 antimonster2 = true
                 textLabelc.Text = "NaNInvincibility [T]"
             else
                 -- 恢复默认值（假设默认是100）
-				if invincible then
-					humanoid.MaxHealth = math.huge
-					humanoid.Health = math.huge
-				else
-                	humanoid.MaxHealth = 100
-                	humanoid.Health = 100
-				end
+                if invincible then
+                    humanoid.MaxHealth = math.huge
+                    humanoid.Health = math.huge
+                else
+                    humanoid.MaxHealth = 100
+                    humanoid.Health = 100
+                end
                 antimonster2 = false
                 textLabelc.Text = ""
             end
         end
-	end
-	if input.KeyCode == Enum.KeyCode.C then
-		espEnabled = not espEnabled
-		if espEnabled then
-			textLabelb.Text = "ESP [C]"
-		else
-			textLabelb.Text = ""
-		end
-	end
+    end
+    if input.KeyCode == Enum.KeyCode.C then
+        espEnabled = not espEnabled
+        if espEnabled then
+            textLabelb.Text = "ESP [C]"
+        else
+            textLabelb.Text = ""
+        end
+    end
     if input.UserInputType == Enum.UserInputType.MouseButton3 then
         local character = LocalPlayer.Character
         if not character then return end
@@ -222,6 +308,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         end
     end
 end)
+
 -- 可选：添加角色重新生成时的重新连接
 LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     Character = newCharacter
@@ -235,60 +322,55 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
 end)
     
 workspace.ChildAdded:Connect(function(child)
-	if not noMonsters then return end
-	if child:IsA("Part") and child.Name == "monster" then
-		wait(0.5)
-		child:Destroy()
-	end
+    if not noMonsters then return end
+    if child:IsA("Part") and child.Name == "monster" then
+        wait(0.5)
+        child:Destroy()
+    end
 end)
+
 workspace.ChildAdded:Connect(function(child)
-	if entityNote then 
-		
-	end
     if not noMonsters then return end
 
     if child:IsA("Part") and child.Name == "handdebris" then
-		wait(1.25)
-		child:Destroy() -- Maybe
-	local currentPosition = camera.CFrame.Position
-    local currentLookVector = camera.CFrame.LookVector
-    -- 计算当前偏航角，但重置俯仰和横滚
-    local currentPitch, currentYaw, _ = camera.CFrame:ToOrientation()
-    
-    -- 创建新的CFrame，只有偏航角，俯仰和横滚为0
-    local newCFrame = CFrame.new(currentPosition) * 
-                      CFrame.Angles(currentPitch, currentYaw, 0)
-    local playerGui = LocalPlayer:WaitForChild("PlayerGui")
-    
-    -- 方法1：直接禁用或移除Shaker
-    local shaker = playerGui:FindFirstChild("Shaker")
-    if shaker then
-        -- 方法A：直接销毁（最彻底）
-        shaker:Destroy()
+        wait(1.25)
+        child:Destroy() -- Maybe
+        local currentPosition = Camera.CFrame.Position
+        local currentLookVector = Camera.CFrame.LookVector
+        -- 计算当前偏航角，但重置俯仰和横滚
+        local currentPitch, currentYaw, _ = Camera.CFrame:ToOrientation()
+        
+        -- 创建新的CFrame，只有偏航角，俯仰和横滚为0
+        local newCFrame = CFrame.new(currentPosition) * 
+                          CFrame.Angles(currentPitch, currentYaw, 0)
+        local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+        
+        -- 方法1：直接禁用或移除Shaker
+        local shaker = playerGui:FindFirstChild("Shaker")
+        if shaker then
+            -- 方法A：直接销毁（最彻底）
+            shaker:Destroy()
+        end
+        -- 立即应用
+        Camera.CFrame = newCFrame
     end
-    -- 立即应用
-    camera.CFrame = newCFrame
-	end
     if child:IsA("Part") and child.Name == "evilbunger" then
-		wait(0.3)
-		child:Destroy() -- Possibly Effectless
-	end
+        wait(0.3)
+        child:Destroy() -- Possibly Effectless
+    end
 end)
+
 workspace.rooms.DescendantAdded:Connect(function(child)
-	if child:IsA("Model") and child.Name == "jack" and espEnabled then
-		if espEnabled then highlight(child.Parent,Color3.fromRGB(255, 125, 125)) end
-	end
-	if noMonsters then
-    if child:IsA("Model") and child.Name == "evilbunger" then
-		wait(0.4)
-		child:Destroy() -- Possibly Effectless
-	end
-	end
-	if child:IsA("Model") and child.Name == "battery" and espEnabled then
-		highlight(child,Color3.fromRGB(255, 150, 50))
-	end
+    if child:IsA("Model") and child.Name == "jack" and espEnabled then
+        if espEnabled then highlight(child.Parent,Color3.fromRGB(255, 125, 125)) end
+    end
+    if noMonsters then
+        if child:IsA("Model") and child.Name == "evilbunger" then
+            wait(0.4)
+            child:Destroy() -- Possibly Effectless
+        end
+    end
+    if child:IsA("Model") and child.Name == "battery" and espEnabled then
+        highlight(child,Color3.fromRGB(255, 150, 50))
+    end
 end)
-
-
-
-
