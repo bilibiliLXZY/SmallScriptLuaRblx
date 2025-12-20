@@ -157,7 +157,7 @@ function getGroundPositionFromScreenCenter()
     if raycastResult then
         -- 检查是否是地面（法线Y分量接近1）
         local groundNormal = raycastResult.Normal.Y
-        if groundNormal > 0.7 then -- 至少是45度以内的斜坡
+        if groundNormal > -0.5 then -- 至少是45度以内的斜坡
             return raycastResult.Position
         end
     end
@@ -374,3 +374,4 @@ workspace.rooms.DescendantAdded:Connect(function(child)
         highlight(child,Color3.fromRGB(255, 150, 50))
     end
 end)
+
