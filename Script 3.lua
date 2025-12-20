@@ -72,8 +72,8 @@ local CONFIG = {
     SHOOT_VELOCITY = 3,         -- 发射速度
     LIQUID_SIZE = Vector3.new(0.5, 0.5, 0.5),  -- 液体大小
     LIQUID_COLOR = Color3.fromRGB(255, 255, 255),  -- 红色
-    LIQUID_TRANSPARENCY = 0.5,   -- 半透明
-    LIQUID_LIFETIME = 5,         -- 液体存在时间（秒）
+    LIQUID_TRANSPARENCY = 0.75,   -- 半透明
+    LIQUID_LIFETIME = 15,         -- 液体存在时间（秒）
     LIQUID_COUNT_PER_SHOT = 8,   -- 每次发射的液体数量
     LIQUID_SPREAD_ANGLE = 5,    -- 散射角度
 }
@@ -424,9 +424,9 @@ local function updateBatteryUI()
     batteryFill.Size = UDim2.new(1, -4, fillHeight, 0)
     
     batteryFill.BackgroundColor3 = Color3.fromRGB(
-        255 * (1 - fillHeight),  -- R: 满电时0，没电时255
-        255 * fillHeight,        -- G: 满电时255，没电时0
-        0
+        255,  -- R: 满电时0，没电时255
+        255,        -- G: 满电时255，没电时0
+        255
     )
 end
 
@@ -883,5 +883,4 @@ workspace.rooms.DescendantAdded:Connect(function(child)
         highlight(child,Color3.fromRGB(255, 150, 50))
     end
 end)
-
 
