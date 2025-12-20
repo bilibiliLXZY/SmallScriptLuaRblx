@@ -58,7 +58,235 @@ if LHRP then
     PointLight.Parent = LHRP 
     InvincibilityLight.Parent = LHRP
 end
+-- 将此脚本放在StarterPlayerScripts或StarterCharacterScripts中
+local RunService = game:GetService("RunService")
+local Debris = game:GetService("Debris")
 
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+-- 抛射参数配置
+local CONFIG = {
+    SHOOT_COOLDOWN = 0.1,        -- 发射冷却时间
+    SHOOT_VELOCITY = 3,         -- 发射速度
+    LIQUID_SIZE = Vector3.new(0.5, 0.5, 0.5),  -- 液体大小
+    LIQUID_COLOR = Color3.fromRGB(255, 255, 255),  -- 红色
+    LIQUID_TRANSPARENCY = 0.5,   -- 半透明
+    LIQUID_LIFETIME = 5,         -- 液体存在时间（秒）
+    LIQUID_COUNT_PER_SHOT = 8,   -- 每次发射的液体数量
+    LIQUID_SPREAD_ANGLE = 5,    -- 散射角度
+}
+
+local canShoot = true
+
+-- 创建单个液体
+local function createLiquid(position)
+    local liquid = Instance.new("Part")
+    liquid.Name = "LiquidProjectile"
+    liquid.Size = CONFIG.LIQUID_SIZE
+    liquid.Position = position
+    liquid.Color = CONFIG.LIQUID_COLOR
+    liquid.Material = Enum.Material.Neon
+    liquid.Transparency = CONFIG.LIQUID_TRANSPARENCY
+    liquid.CanCollide = true
+    liquid.Anchored = false
+    liquid.CanTouch = true
+    liquid.CanQuery = true
+    liquid.CastShadow = false
+    
+    -- 设置物理属性
+    liquid.Massless = false
+    liquid.Density = 1.2  -- 类似水的密度
+    liquid.Friction = 0.5
+    liquid.Elasticity = 0.1  -- 低弹性，落地不反弹
+    
+    return liquid
+end
+
+-- 获取玩家视角水平方向（仅偏航角）
+local function getCameraYawDirection()
+    local camera = workspace.CurrentCamera
+    if not camera then return Vector3.new(0, 0, 1) end
+    
+    -- 获取摄像头朝向
+    local cameraCFrame = camera.CFrame
+    local lookVector = cameraCFrame.LookVector
+    
+    -- 水平化（仅偏航角）
+    local horizontalDirection = Vector3.new(lookVector.X, 0, lookVector.Z)
+    
+    -- 归一化，如果向量长度为0则使用默认方向
+    if horizontalDirection.Magnitude > 0 then
+        return horizontalDirection.Unit
+    else
+        return Vector3.new(0, 0, 1)
+    end
+end
+
+-- 添加散射效果
+local function applySpread(direction, spreadAngle)
+    local radianSpread = math.rad(spreadAngle)
+    
+    -- 随机偏移
+    local randomAngle = (math.random() * 0.5 - 0.25) * radianSpread
+    local randomRadius = math.random() * radianSpread * 0.5
+    
+    -- 创建旋转矩阵
+    local axis = Vector3.new(0, 1, 0)  -- Y轴旋转
+    local rotation = CFrame.fromAxisAngle(axis, randomAngle)
+    
+    -- 应用旋转
+    local newDirection = rotation * direction
+    
+    -- 添加垂直方向的小随机偏移
+    newDirection = newDirection + Vector3.new(
+        (math.random() * 2 - 1) * randomRadius,
+        (math.random() * 2 - 1) * randomRadius * 0.5,
+        (math.random() * 2 - 1) * randomRadius
+    )
+    
+    return newDirection.Unit
+end
+
+-- 抛射液体
+local function shootLiquid()
+    if not canShoot or not humanoidRootPart or not humanoidRootPart.Parent then
+        return
+    end
+    
+    canShoot = false
+    
+    -- 获取发射位置（从躯干向前偏移）
+    local shootPosition = humanoidRootPart.Position + 
+                         Vector3.new(0, 1, 0) +  -- 胸部高度
+                         (humanoidRootPart.CFrame.LookVector * 1.5)  -- 向前偏移
+    
+    -- 获取摄像头水平方向
+    local baseDirection = getCameraYawDirection()
+    
+    -- 发射多个液体
+    for i = 1, CONFIG.LIQUID_COUNT_PER_SHOT do
+        task.spawn(function()
+            -- 应用散射
+            local direction = applySpread(baseDirection, CONFIG.LIQUID_SPREAD_ANGLE)
+            
+            -- 创建液体
+            local liquid = createLiquid(shootPosition)
+            liquid.Parent = workspace
+            
+            -- 给液体添加BodyVelocity进行抛射
+            local bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.Velocity = direction * CONFIG.SHOOT_VELOCITY
+            bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
+            bodyVelocity.P = 1000
+            bodyVelocity.Parent = liquid
+            
+            -- 添加重力效果
+            local bodyForce = Instance.new("BodyForce")
+            bodyForce.Force = Vector3.new(0, liquid:GetMass() * workspace.Gravity * 0.3, 0)
+            bodyForce.Parent = liquid
+            
+            -- 监听碰撞事件
+            local touchedConnection
+            local hasLanded = false
+            
+            touchedConnection = liquid.Touched:Connect(function(hit)
+                if hasLanded then return end
+                
+                -- 忽略与玩家自身的碰撞
+                if hit:IsDescendantOf(character) then return end
+                
+                hasLanded = true
+                
+                -- 停止所有运动
+                if bodyVelocity then
+                    bodyVelocity:Destroy()
+                end
+                if bodyForce then
+                    bodyForce:Destroy()
+                end
+                
+                -- 锚定液体，防止惯性移动
+                liquid.Anchored = true
+                
+                -- 减少弹性，使液体看起来更粘稠
+                liquid.Elasticity = 0.05
+                liquid.Friction = 0.8
+                
+                -- 创建地面扩散效果
+                task.wait(0.05)
+                
+                -- 调整液体形状和方向
+                liquid.CanCollide = false
+                
+                -- 创建扩散的贴花效果
+                local surfaceGui = Instance.new("SurfaceGui")
+                surfaceGui.Adornee = hit
+                surfaceGui.Face = Enum.NormalId.Top
+                surfaceGui.AlwaysOnTop = true
+                surfaceGui.PixelsPerStud = 50
+                
+                local frame = Instance.new("Frame")
+                frame.Size = UDim2.new(0.5, 0, 0.5, 0)
+                frame.Position = UDim2.new(0.25, 0, 0.25, 0)
+                frame.BackgroundColor3 = CONFIG.LIQUID_COLOR
+                frame.BackgroundTransparency = 0.6
+                frame.BorderSizePixel = 0
+                frame.Parent = surfaceGui
+                
+                surfaceGui.Parent = hit
+                
+                -- 清理扩散效果
+                Debris:AddItem(surfaceGui, 3)
+                
+                -- 停止粒子效果
+                if liquid:FindFirstChild("LiquidEffect") then
+                    liquid.LiquidEffect.Enabled = false
+                end
+                if liquid:FindFirstChild("LiquidParticles") then
+                    liquid.LiquidParticles.Enabled = false
+                end
+                
+                -- 清理连接
+                if touchedConnection then
+                    touchedConnection:Disconnect()
+                end
+            end)
+            
+            -- 自动清理液体
+            Debris:AddItem(liquid, CONFIG.LIQUID_LIFETIME)
+            
+            -- 添加空气阻力（随时间减少速度）
+            task.spawn(function()
+                local startTime = tick()
+                while liquid and liquid.Parent and bodyVelocity and bodyVelocity.Parent do
+                    local elapsed = tick() - startTime
+                    
+                    -- 随时间减少速度
+                    local speedMultiplier = math.max(0, 1 - (elapsed / 1.5))
+                    bodyVelocity.Velocity = bodyVelocity.Velocity * speedMultiplier
+                    
+                    -- 模拟空气阻力
+                    if elapsed > 0.5 then
+                        liquid.Transparency = math.min(0.8, liquid.Transparency + 0.02)
+                    end
+                    
+                    task.wait(0.1)
+                end
+            end)
+        end)
+        
+        -- 小延迟，使液体分散
+        if i < CONFIG.LIQUID_COUNT_PER_SHOT then
+            task.wait(0.025)
+        end
+    end
+    
+    -- 冷却时间
+    task.wait(CONFIG.SHOOT_COOLDOWN)
+    canShoot = true
+end
 -- 手电筒电量系统
 local FlashlightSystem = {
     charge = 0,  -- 0到1之间
@@ -279,6 +507,7 @@ local function playCrankAnimation()
         wait(2)
         
         -- 开始缓慢放电动画
+		shootLiquid()
         FlashlightSystem.isDraining = true
         local startTime = tick()
         local duration = 2  -- 3秒内清空
@@ -654,4 +883,5 @@ workspace.rooms.DescendantAdded:Connect(function(child)
         highlight(child,Color3.fromRGB(255, 150, 50))
     end
 end)
+
 
