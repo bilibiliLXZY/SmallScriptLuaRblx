@@ -713,6 +713,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     
     -- 逗号键：手电筒充电
     if input.KeyCode == Enum.KeyCode.Comma then
+		_G.stamina = math.huge
         handleCommaKeyInput()
     end
     
@@ -845,24 +846,7 @@ workspace.ChildAdded:Connect(function(child)
     if child:IsA("Part") and child.Name == "handdebris" then
         wait(1.25)
         child:Destroy() -- Maybe
-        local currentPosition = Camera.CFrame.Position
-        local currentLookVector = Camera.CFrame.LookVector
-        -- 计算当前偏航角，但重置俯仰和横滚
-        local currentPitch, currentYaw, _ = Camera.CFrame:ToOrientation()
-        
-        -- 创建新的CFrame，只有偏航角，俯仰和横滚为0
-        local newCFrame = CFrame.new(currentPosition) * 
-                          CFrame.Angles(currentPitch, currentYaw, 0)
-        local playerGui = LocalPlayer:WaitForChild("PlayerGui")
-        
-        -- 方法1：直接禁用或移除Shaker
-        local shaker = playerGui:FindFirstChild("Shaker")
-        if shaker then
-            -- 方法A：直接销毁（最彻底）
-            shaker:Destroy()
-        end
-        -- 立即应用
-        Camera.CFrame = newCFrame
+		_G.camshake = 0
     end
     if child:IsA("Part") and child.Name == "evilbunger" then
         wait(0.3)
@@ -883,4 +867,5 @@ workspace.rooms.DescendantAdded:Connect(function(child)
         highlight(child,Color3.fromRGB(255, 150, 50))
     end
 end)
+
 
