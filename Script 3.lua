@@ -794,11 +794,63 @@ end
 
 -- 初始设置R6手臂
 setupR6Arms()
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+-- 方法1.1：使用VirtualInputManager（最可靠）
+function simulateKeyPress(keyCode)
+    -- 模拟按下
+    VirtualInputManager:SendKeyEvent(true, keyCode, false, nil)
+    wait(0.1)
+    -- 模拟松开
+    VirtualInputManager:SendKeyEvent(false, keyCode, false, nil)
+end
+
+-- 模拟按下E键
+
+function teleportToNearestDoor()
+    -- 获取玩家角色
+local player = game.Players.LocalPlayer
+local character = player.Character
+local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+if not humanoidRootPart then return end
+
+-- 获取玩家当前位置
+local playerPos = humanoidRootPart.Position
+
+-- 寻找最近的CanCollide=true的门
+local nearestDoor = nil
+local minDistance = math.huge
+
+for _, door in pairs(workspace:GetDescendants()) do
+    if door:IsA("BasePart") and door.Name == "door" and door.CanCollide == true then
+        local distance = (door.Position - playerPos).Magnitude
+        if distance < minDistance then
+            minDistance = distance
+            nearestDoor = door
+        end
+    end
+end
+
+-- 如果找到门，传送玩家
+if nearestDoor then
+    -- 在世界坐标系Z轴正方向偏移5个单位
+    local teleportPos = nearestDoor.Position + Vector3.new(0, 0, 2)
+    
+    -- 传送玩家
+    character:SetPrimaryPartCFrame(CFrame.new(teleportPos))
+end
+end
+-- 按键触发传送
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     
     -- 逗号键：手电筒充电
+    if input.KeyCode == Enum.KeyCode.V then
+        teleportToNearestDoor()  -- Z轴偏移3个单位
+        wait(0.5)
+        simulateKeyPress(Enum.KeyCode.E)
+    end
     if input.KeyCode == Enum.KeyCode.Comma then
 		_G.stamina = math.huge
         handleCommaKeyInput()
@@ -936,6 +988,15 @@ workspace.ChildAdded:Connect(function(child)
     if child:IsA("Part") and child.Name == "monster2" then
         animateLightExpansion("A-120/A-200/A-200 Prime")
     end
+    if child:IsA("Model") and child.Name == "Spirit" then
+        animateLightExpansion("A-100")
+    end
+    if child:IsA("Part") and child.Name == "Guardian" then
+        animateLightExpansion("A-400")
+    end
+    if child:IsA("Part") and child.Name == "???" then
+        animateLightExpansion("A-666")
+    end
 end)
 workspace.ChildAdded:Connect(function(child)
     if not noMonsters then return end
@@ -949,9 +1010,7 @@ workspace.ChildAdded:Connect(function(child)
         wait(0.3)
         child:Destroy() -- Possibly Effectless
     end
-    if child:IsA("Model") and child.Name == "Spirit" then
-        animateLightExpansion("A-100")
-    end
+
 end)
 workspace.rooms.DescendantAdded:Connect(function(child)
     if child:IsA("Model") and child.Name == "jack" and espEnabled then
