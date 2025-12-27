@@ -149,6 +149,7 @@ local function applySpread(direction, spreadAngle)
     return newDirection.Unit
 end
 
+
 -- 抛射液体
 local function shootLiquid()
     if not canShoot or not humanoidRootPart or not humanoidRootPart.Parent then
@@ -368,6 +369,92 @@ textLabelc.Font = Enum.Font.SourceSansBold
 textLabelc.Parent = screenGui
 local antimonster2 = false
 
+-- 在LocalScript中
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+-- 创建点光源函数
+function createExpandingLight(position, properties)
+    -- 创建点光源
+    local textLabela = Instance.new("TextLabel")
+textLabela.Size = UDim2.new(0, 200, 0, 30)  -- 宽度200，高度30
+textLabela.Position = UDim2.new(0, 175, 0, 0)  -- 左上角，偏移10像素
+textLabela.Text = properties
+textLabela.TextColor3 = Color3.new(1, 0.5, 0.5)  -- 白色文本
+textLabela.TextSize = 30
+textLabela.BackgroundTransparency = 1  -- 背景透明
+textLabela.TextXAlignment = Enum.TextXAlignment.Left  -- 左对齐
+textLabela.TextYAlignment = Enum.TextYAlignment.Top  -- 顶部对齐
+textLabela.Font = Enum.Font.SourceSansBold
+textLabela.Parent = screenGui
+    --
+    
+    return textLabela, lightPart
+end
+
+-- 动画函数
+function animateLightExpansion(text)
+    -- 在玩家位置创建光源
+    local position = humanoidRootPart.Position
+    
+    -- 创建光源
+    local pointLight, lightPart = createExpandingLight(position, text)
+    
+    -- 定义动画参数
+    local expandTime = 1  -- 扩散时间
+    local holdTime = 2    -- 保持时间
+    local contractTime = 0.5 -- 收回时间
+    local maxRange = 85      -- 最大范围
+    
+    -- 创建补间信息
+    local expandTweenInfo = TweenInfo.new(
+        expandTime,  -- 时间
+        Enum.EasingStyle.Quad,  -- 缓动类型
+        Enum.EasingDirection.Out,  -- 缓动方向
+        0,  -- 重复次数
+        false,  -- 反转
+        0  -- 延迟
+    )
+    
+    local contractTweenInfo = TweenInfo.new(
+        contractTime,
+        Enum.EasingStyle.Quad,
+        Enum.EasingDirection.In,
+        0,
+        false,
+        0
+    )
+    
+    -- 创建补间
+    local expandTween = TweenService:Create(pointLight, expandTweenInfo, {
+        Position = UDim2.new(0, 175, 0, maxRange)
+    })
+    
+    local contractTween = TweenService:Create(pointLight, contractTweenInfo, {
+        Position = UDim2.new(0, 175, 0, 0)
+    })
+    
+    -- 执行动画序列
+    expandTween:Play()
+    
+    expandTween.Completed:Connect(function()
+        -- 扩散完成后等待一段时间
+        task.wait(holdTime)
+        
+        -- 开始收回动画
+        contractTween:Play()
+        
+        contractTween.Completed:Connect(function()
+            -- 完全收回后销毁
+            if pointLight then
+                pointLight:Destroy()
+            end
+            print("点光源动画完成并销毁")
+        end)
+    end)
+    
+    return pointLight, lightPart
+end
 -- 手电筒电量UI
 local batteryScreenGui
 local batteryFrame, batteryFill, batteryBorder
@@ -839,7 +926,17 @@ workspace.ChildAdded:Connect(function(child)
         child:Destroy()
     end
 end)
-
+workspace.ChildAdded:Connect(function(child)
+    if child:IsA("Part") and child.Name == "handdebris" then
+        animateLightExpansion("A-250")
+    end
+    if child:IsA("Part") and child.Name == "monster" then
+        animateLightExpansion("A-60/A-60 Prime")
+    end
+    if child:IsA("Part") and child.Name == "monster2" then
+        animateLightExpansion("A-120/A-200/A-200 Prime")
+    end
+end)
 workspace.ChildAdded:Connect(function(child)
     if not noMonsters then return end
 
@@ -851,6 +948,9 @@ workspace.ChildAdded:Connect(function(child)
     if child:IsA("Part") and child.Name == "evilbunger" then
         wait(0.3)
         child:Destroy() -- Possibly Effectless
+    end
+    if child:IsA("Model") and child.Name == "Spirit" then
+        animateLightExpansion("A-100")
     end
 end)
 workspace.rooms.DescendantAdded:Connect(function(child)
@@ -866,6 +966,6 @@ workspace.rooms.DescendantAdded:Connect(function(child)
     if child:IsA("Model") and child.Name == "battery" and espEnabled then
         highlight(child,Color3.fromRGB(255, 150, 50))
     end
+    
 end)
-
 
